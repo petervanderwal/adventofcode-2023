@@ -1,0 +1,7 @@
+framework:
+    http_client:
+        scoped_clients:
+            adventOfCode.client:
+                base_uri: 'https://adventofcode.com/2021/'
+                headers:
+                    Cookie: 'session=%env(ADVENT_OF_CODE_SESSION_ID)%'
