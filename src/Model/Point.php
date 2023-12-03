@@ -50,6 +50,11 @@ class Point extends AbstractPoint implements VertexInterface
         return $this->getNew($this->x + $xSteps, $this->y + $ySteps);
     }
 
+    public function offset(Point $offset): static
+    {
+        return $this->moveXY($offset->x, $offset->y);
+    }
+
     protected function getNew(int $x, int $y): static
     {
         return new Point($x, $y);

@@ -8,6 +8,7 @@ use App\Model\Iterator\AbstractIterator;
 use App\Model\Matrix\Area;
 use App\Model\Matrix\Column;
 use App\Model\Matrix\ColumnIterator;
+use App\Model\Matrix\MatchIterator;
 use App\Model\Matrix\Row;
 use App\Model\Matrix\RowIterator;
 use App\Utility\IterableUtility;
@@ -21,6 +22,7 @@ class Matrix extends AbstractIterator
      */
     private array $rows = [];
     private int $numberOfColumns;
+    private Point $sectionOffset;
 
     public function __construct(array|Row ...$rows)
     {
@@ -264,24 +266,22 @@ class Matrix extends AbstractIterator
         }
     }
 
-    public function plot(?callable $characterPlotter = null): string
+    public function matches(string $pattern): MatchIterator
     {
-        return $this->plotSection(
-            0,
-            0,
-            $this->getNumberOfRows() - 1,
-            $this->getNumberOfColumns() - 1,
-            $characterPlotter
-        );
+        return new MatchIterator($this, $pattern);
     }
 
-    public function plotSection(
-        int $rowStart,
-        int $columnStart,
-        int $rowEnd,
-        int $columnEnd,
-        ?callable $characterPlotter = null
-    ): string {
+    public function plot(?callable $characterPlotter = null): string
+    {
+        $lines = [];
+        foreach ($this->getRows() as $row) {
+            $lines[] = $row->toString($characterPlotter);
+        }
+        return implode(PHP_EOL, $lines);
+    }
+
+    public function extractSection(int $rowStart, int $columnStart, int $rowEnd, int $columnEnd): static
+    {
         if (!$this->hasCoordinate($rowStart, $columnStart)) {
             throw new \OutOfRangeException(
                 sprintf('No such start row, column: %d, %d', $rowStart, $columnStart),
@@ -290,7 +290,7 @@ class Matrix extends AbstractIterator
         }
         if (!$this->hasCoordinate($rowEnd, $columnEnd)) {
             throw new \OutOfRangeException(
-                sprintf('No such start row, column: %d, %d', $rowEnd, $columnEnd),
+                sprintf('No such end row, column: %d, %d', $rowEnd, $columnEnd),
                 221214070757
             );
         }
@@ -303,14 +303,27 @@ class Matrix extends AbstractIterator
 
         $lines = [];
         for ($row = $rowStart; $row <= $rowEnd; $row++) {
-            $line = '';
+            $line = [];
             for ($column = $columnStart; $column <= $columnEnd; $column++) {
-                $item = $this->rows[$row][$column];
-                $line .= $characterPlotter === null ? $item : $characterPlotter($item);
+                $line[] = $this->rows[$row][$column];
             }
             $lines[] = $line;
         }
-        return implode(PHP_EOL, $lines);
+
+        $section = new static(...$lines);
+        $section->sectionOffset = $this->getSectionOffset()->moveXY($columnStart, $rowStart);
+        return $section;
+    }
+
+    /**
+     * @return Point
+     */
+    public function getSectionOffset(): Point
+    {
+        if (!isset($this->sectionOffset)) {
+            return new Point(0, 0);
+        }
+        return $this->sectionOffset;
     }
 
     /**

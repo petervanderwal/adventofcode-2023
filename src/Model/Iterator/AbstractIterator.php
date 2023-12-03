@@ -15,6 +15,14 @@ abstract class AbstractIterator implements IteratorInterface
         return $result;
     }
 
+    public function empty(): bool
+    {
+        foreach ($this as $unused) {
+            return false;
+        }
+        return true;
+    }
+
     public function toArray(): array
     {
         return iterator_to_array($this);

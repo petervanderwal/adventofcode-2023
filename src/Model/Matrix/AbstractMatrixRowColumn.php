@@ -33,4 +33,18 @@ abstract class AbstractMatrixRowColumn extends AbstractMatrixIterator
     {
         return $this->matrix->getPoint($this->getCoordinate($index));
     }
+
+    public function toString(?callable $characterPlotter = null): string
+    {
+        $result = '';
+        foreach ($this as $character) {
+            $result .= $characterPlotter === null ? $character : $characterPlotter($character);
+        }
+        return $result;
+    }
+
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
 }
