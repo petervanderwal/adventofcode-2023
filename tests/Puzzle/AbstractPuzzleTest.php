@@ -46,7 +46,7 @@ abstract class AbstractPuzzleTest extends KernelTestCase
         );
 
         // If Advent of Code replied it was correct, then auto update the unit test
-        if (preg_match('/the\s+right\s+answer/i', $adventOfCodeResponse)) {
+        if (preg_match('/(?<! not )the\s+right\s+answer/i', $adventOfCodeResponse)) {
             $filename = (new \ReflectionClass($this))->getFileName();
             $lineToAdd = sprintf(
                 "\n    protected int|string|null \$expectedAnswer%dValue = %s;",
