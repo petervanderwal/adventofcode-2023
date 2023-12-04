@@ -11,8 +11,7 @@ class Day04 extends AbstractPuzzle
     public function calculateAssignment1(PuzzleInput $input): int|string
     {
         $result = 0;
-        foreach ($this->parseInput($input) as $card) {
-            $amountWinning = count(array_intersect($card[0], $card[1]));
+        foreach ($this->parseInput($input) as $amountWinning) {
             if ($amountWinning === 0) {
                 continue;
             }
@@ -24,23 +23,33 @@ class Day04 extends AbstractPuzzle
 
     public function calculateAssignment2(PuzzleInput $input): int|string
     {
-        // TODO: Implement calculateAssignment2() method.
+        $result = 0;
+        $futureCopies = [];
+        foreach ($this->parseInput($input) as $amountWinning) {
+            $amountOfCopies = array_shift($futureCopies) ?? 0;
+            $result += $amountOfCopies + 1;
+
+            for ($i = 0; $i < $amountWinning; $i++) {
+                $futureCopies[$i] = ($futureCopies[$i] ?? 0) + 1 + $amountOfCopies;
+            }
+        }
+        return $result;
     }
 
     /**
      * @param PuzzleInput $input
-     * @return array<int, array{0: int[], 1: int[]}>
+     * @return array<int, int}>
      */
     private function parseInput(PuzzleInput $input): array
     {
         return $input->mapLines(
-            function (string $line): array {
+            function (string $line): int {
                 $line = preg_replace('/^Card +[0-9]+: +/', '', $line);
                 $sections = explode(' | ', $line);
-                return [
+                return count(array_intersect(
                     $this->parseSection($sections[0]),
                     $this->parseSection($sections[1]),
-                ];
+                ));
             }
         );
     }
