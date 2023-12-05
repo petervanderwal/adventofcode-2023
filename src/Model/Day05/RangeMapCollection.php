@@ -19,8 +19,31 @@ class RangeMapCollection
     public function solve(int $number)
     {
         foreach ($this->rangeMaps as $rangeMap) {
-            $number = $rangeMap->solve($number);
+            $number = $rangeMap->getDestinationBySource($number);
         }
         return $number;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getAllRangesSourceStartPoints(): array
+    {
+        $result = [];
+        foreach (array_reverse($this->rangeMaps) as $rangeMap) {
+            $result = array_map(
+                fn (int $previousMapSourceThisMapDestination) => $rangeMap->getSourceByDestination($previousMapSourceThisMapDestination),
+                $result
+            );
+
+            foreach ($rangeMap->getRanges() as $range) {
+                $result[] = $range->sourceStart;
+                $result[] = $range->sourceStart + $range->length; // At the end a new range starts
+            }
+        }
+
+        $result = array_unique($result);
+        sort($result);
+        return $result;
     }
 }

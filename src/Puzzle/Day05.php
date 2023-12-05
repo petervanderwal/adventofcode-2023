@@ -23,7 +23,21 @@ class Day05 extends AbstractPuzzle
 
     public function calculateAssignment2(PuzzleInput $input): int|string
     {
-        // Todo implement calculateAssignment2
+        [$seedPairs, $maps] = $this->parseInput($input);
+        $allRangesSourceStartPoints = $maps->getAllRangesSourceStartPoints();
+
+        $result = PHP_INT_MAX;
+        foreach (array_chunk($seedPairs, 2) as [$seedStart, $seedLength]) {
+            $seedsToCheck = array_unique([
+                $seedStart,
+                ...array_filter($allRangesSourceStartPoints, fn (int $rangeStart) => $rangeStart > $seedStart && $rangeStart < $seedStart + $seedLength),
+            ]);
+
+            foreach ($seedsToCheck as $seed) {
+                $result = min($result, $maps->solve($seed));
+            }
+        }
+        return $result;
     }
 
     /**

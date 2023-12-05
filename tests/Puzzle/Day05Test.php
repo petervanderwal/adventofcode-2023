@@ -13,5 +13,5 @@ class Day05Test extends AbstractPuzzleTest
     protected int|string|null $expectedAnswer1Value = 165788812;
 
     protected int|string|array $expectedDemo2Value = 46;
-    protected bool $executeParallelAssignment2 = false;
+    protected int|string|null $expectedAnswer2Value = 1928058;
 }

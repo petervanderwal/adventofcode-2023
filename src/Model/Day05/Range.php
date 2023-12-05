@@ -12,11 +12,19 @@ class Range
         public readonly int $length,
     ) {}
 
-    public function solve(int $number): ?int
+    public function getDestinationBySource(int $source): ?int
     {
-        if ($number < $this->sourceStart || $number >= $this->sourceStart + $this->length) {
+        if ($source < $this->sourceStart || $source >= $this->sourceStart + $this->length) {
             return null;
         }
-        return $this->destinationStart + $number - $this->sourceStart;
+        return $this->destinationStart + $source - $this->sourceStart;
+    }
+
+    public function getSourceByDestination(int $destination): ?int
+    {
+        if ($destination < $this->destinationStart || $destination >= $this->destinationStart + $this->length) {
+            return null;
+        }
+        return $this->sourceStart + $destination - $this->destinationStart;
     }
 }

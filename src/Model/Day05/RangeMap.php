@@ -17,14 +17,33 @@ class RangeMap
         return $this;
     }
 
-    public function solve(int $number): int
+    public function getDestinationBySource(int $source): int
     {
         foreach ($this->ranges as $range) {
-            if (null !== $result = $range->solve($number)) {
+            if (null !== $result = $range->getDestinationBySource($source)) {
                 return $result;
             }
         }
         // No translation
-        return $number;
+        return $source;
+    }
+
+    public function getSourceByDestination(int $destination): int
+    {
+        foreach ($this->ranges as $range) {
+            if (null !== $result = $range->getSourceByDestination($destination)) {
+                return $result;
+            }
+        }
+        // No translation
+        return $destination;
+    }
+
+    /**
+     * @return Range[]
+     */
+    public function getRanges(): array
+    {
+        return $this->ranges;
     }
 }
