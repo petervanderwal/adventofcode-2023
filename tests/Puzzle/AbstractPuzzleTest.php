@@ -10,16 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 abstract class AbstractPuzzleTest extends KernelTestCase
 {
-    protected string $demo1InputFile = 'demo';
     protected int|string|array $expectedDemo1Value;
     protected bool $executeFullAssignment1 = true;
-    protected bool $executeParallelAssignment1 = true;
+    protected bool $executeParallelAssignment1 = false;
     protected int|string|null $expectedAnswer1Value = null;
 
-    protected string $demo2InputFile = 'demo';
     protected int|string|array $expectedDemo2Value;
     protected bool $executeFullAssignment2 = true;
-    protected bool $executeParallelAssignment2 = true;
+    protected bool $executeParallelAssignment2 = false;
     protected int|string|null $expectedAnswer2Value = null;
 
     protected function writeAnswer(int $level, int|string $answer): void
