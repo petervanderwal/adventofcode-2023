@@ -20,27 +20,8 @@ enum Card: string
     case THREE = '3';
     case TWO = '2';
 
-    public function getRank(): int
+    public function getRank(Card ...$order): int
     {
-        return array_search($this, [
-            2 => self::TWO,
-            self::THREE,
-            self::FOUR,
-            self::FIVE,
-            self::SIX,
-            self::SEVEN,
-            self::EIGHT,
-            self::NINE,
-            self::TEN,
-            self::JACK,
-            self::QUEEN,
-            self::KING,
-            self::ACE
-        ]);
-    }
-
-    public function compare(Card $card): int
-    {
-        return $this->getRank() <=> $card->getRank();
+        return array_search($this, $order);
     }
 }
