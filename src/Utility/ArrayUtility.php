@@ -90,4 +90,22 @@ class ArrayUtility
         }
         return $result;
     }
+
+    public static function last(array $array): mixed
+    {
+        if (empty($array)) {
+            throw new \OutOfBoundsException('Array is empty', 231208170512);
+        }
+        return $array[array_key_last($array)];
+    }
+
+    /**
+     * @param mixed|\Closure $search The search term, pass a \Closure (e.g. fn ($v) => ...) for a custom filter
+     * @return array<int, int|string> The found keys
+     */
+    public static function searchAll(array $array, mixed $search): array
+    {
+        $filter = $search instanceof \Closure ? $search : fn (mixed $v) => $v === $search;
+        return array_keys(array_filter($array, $filter));
+    }
 }

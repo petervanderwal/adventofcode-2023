@@ -71,6 +71,16 @@ abstract class AbstractIterator implements IteratorInterface
         return false;
     }
 
+    public function all(callable $selector): bool
+    {
+        foreach ($this as $item) {
+            if (!$selector($item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function sum(): int|float
     {
         return $this->reduce(fn (int|float $carry, int|float $item) => $carry + $item, 0);
