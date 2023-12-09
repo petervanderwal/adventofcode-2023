@@ -21,6 +21,6 @@ class NumberUtility
      */
     public static function getNumbersFromLine(string|UnicodeString $line): array
     {
-        return RegexUtility::extractAll('/[0-9]+/', $line, parse: fn (string $val) => (int)$val);
+        return RegexUtility::extractAll('/-?[0-9]+/', $line, parse: fn (string $val) => (int)$val);
     }
 }
