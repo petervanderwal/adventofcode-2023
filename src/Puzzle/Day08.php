@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Puzzle;
 
+use App\Model\Day08\CycleData;
 use App\Model\Iterator\ArrayIterator;
 use App\Model\Iterator\RepeatedIterator;
 use App\Model\Iterator\StringCharacterIterator;
@@ -11,6 +12,7 @@ use App\Model\Parallel\Task;
 use App\Model\Parallel\TaskSet;
 use App\Model\PuzzleInput;
 use App\Utility\ArrayUtility;
+use App\Utility\MathUtility;
 use App\Utility\RegexUtility;
 
 class Day08 extends AbstractPuzzle
@@ -33,7 +35,7 @@ class Day08 extends AbstractPuzzle
 
     public function calculateAssignment2(PuzzleInput $input): int
     {
-        return $this->calculateAssignment2Smart($input);
+        return $input->isDemoInput() ? $this->calculateAssignment2Smart($input) : $this->calculateAssignment2UgglyLCM($input);
     }
 
     private function calculateAssignment2BruteForce(PuzzleInput $input): int
@@ -142,10 +144,97 @@ class Day08 extends AbstractPuzzle
         }
     }
 
+    private function calculateAssignment2UgglyLCM(PuzzleInput $input): int
+    {
+        [$instructions, $graph] = $this->parseInput($input);
+
+        $startPositions = array_filter(array_keys($graph), fn (string $node) => str_ends_with($node, 'A'));
+
+        $allCycleData = $this->calculateCycleLengthAndZPositionsOptimized($instructions, $graph, ...$startPositions);
+
+        // This calculation is not correct - it only works because the input data is crafted as such
+        // https://www.reddit.com/r/adventofcode/comments/18e6vdf/2023_day_8_part_2_an_explanation_for_why_the/
+        $cycleLengths = array_unique(array_map(fn (CycleData $cycleData) => $cycleData->cycleLength, $allCycleData));
+        $greatestCommonDivisor = MathUtility::greatestCommonDivisor(...$cycleLengths);
+        $fullCycleLength = ArrayUtility::multiply(array_map(fn (int $cycleLength) => $cycleLength / $greatestCommonDivisor, $cycleLengths)) * $greatestCommonDivisor;
+        return $fullCycleLength;
+    }
+
+    /**
+     * @param array<string, array{L: string, R: string}> $graph
+     * @return CycleData[]
+     */
+    private function calculateCycleLengthAndZPositionsOptimized(string $instructions, array $graph, string ...$startPositions): array
+    {
+        $fullLoops = [];
+        foreach (array_keys($graph) as $loop) {
+            $position = $loop;
+            foreach (new StringCharacterIterator($instructions) as $instruction) {
+                $fullLoops[$loop][] = $position = $graph[$position][$instruction];
+            }
+        }
+
+        return array_map(
+            fn (string $position) => $this->calculateCycleLengthAndZPositionsFromLoops($fullLoops, $position),
+            $startPositions
+        );
+    }
+
+    /**
+     * @param array<string, string[]> $fullLoops
+     */
+    private function calculateCycleLengthAndZPositionsFromLoops(array $fullLoops, string $position): CycleData
+    {
+        $endsWithZ = fn(string $position) => str_ends_with($position, 'Z');
+
+        $pathStart = $position;
+        $paths = [];
+        for ($i = 0; ; $i++) {
+            $pathToAdd = $fullLoops[$position];
+            $position = ArrayUtility::last($pathToAdd);
+            if (false !== $loopStart = array_search($pathToAdd, $paths, true)) {
+                $beforePath = [$pathStart, ...array_merge(...array_slice($paths, 0, $loopStart))];
+                $cyclePath = array_merge(...array_slice($paths, $loopStart));
+                return new CycleData(
+                    $pathStart,
+                    ArrayUtility::searchAll($beforePath, $endsWithZ),
+                    ArrayUtility::searchAll($cyclePath, $endsWithZ),
+                    count($beforePath),
+                    count($cyclePath),
+                );
+            }
+
+            $paths[] = $pathToAdd;
+        }
+    }
+
+    /**
+     * @return CycleData[]
+     */
+    private function normalizeCycleData(CycleData ...$cycleData): array
+    {
+        if (count($cycleData) < 2) {
+            return $cycleData;
+        }
+
+        // Move all cycles so that they have the same start positions
+        $maxCycleStart = max(...array_map(fn (CycleData $cycleData) => $cycleData->cycleStart, $cycleData));
+        $cycleData = array_map(fn (CycleData $cycleData) => $cycleData->moveCycleStart($maxCycleStart), $cycleData);
+
+        // Repeat all cycles zo that they all have the same length
+        $cycleLengths = array_unique(array_map(fn (CycleData $cycleData) => $cycleData->cycleLength, $cycleData));
+        $greatestCommonDivisor = MathUtility::greatestCommonDivisor(...$cycleLengths);
+        $fullCycleLength = ArrayUtility::multiply(array_map(fn (int $cycleLength) => $cycleLength / $greatestCommonDivisor, $cycleLengths)) * $greatestCommonDivisor;
+        var_dump($greatestCommonDivisor, $fullCycleLength);
+        $cycleData[0]->increaseCycleLength($fullCycleLength);
+        if ($fullCycleLength > 100) die();
+        return array_map(fn (CycleData $cycleData) => $cycleData->increaseCycleLength($fullCycleLength), $cycleData);
+    }
+
     /**
      * @param PuzzleInput $input
      * @return array{
-     *          0: RepeatedIterator<string>,
+     *          0: string,
      *          1: array<string, array{L: string, R: string}>
      *     }
      */

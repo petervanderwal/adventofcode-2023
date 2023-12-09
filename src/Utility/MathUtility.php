@@ -27,4 +27,21 @@ class MathUtility
     {
         return (-$b + $sign * sqrt(pow($b, 2) - 4 * $a * $c)) / (2 * $a);
     }
+
+    public static function greatestCommonDivisor(int $a, int $b, int ...$c): int
+    {
+        $result = static::_greatestCommonDivisor($a, $b);
+        foreach ($c as $number) {
+            $result = static::_greatestCommonDivisor($result, $number);
+        }
+        return $result;
+    }
+
+    private static function _greatestCommonDivisor(int $a, int $b): int
+    {
+        // Euclidean Algorithm: https://en.wikipedia.org/wiki/Greatest_common_divisor#Euclidean_algorithm
+        $max = (int)max($a, $b);
+        $min = (int)min($a, $b);
+        return $min === 0 ? $max : static::_greatestCommonDivisor($min, $max % $min);
+    }
 }

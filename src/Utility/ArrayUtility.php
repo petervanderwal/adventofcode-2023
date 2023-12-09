@@ -91,6 +91,14 @@ class ArrayUtility
         return $result;
     }
 
+    public static function first(array $array): mixed
+    {
+        if (empty($array)) {
+            throw new \OutOfBoundsException('Array is empty', 231208170512);
+        }
+        return $array[array_key_first($array)];
+    }
+
     public static function last(array $array): mixed
     {
         if (empty($array)) {
