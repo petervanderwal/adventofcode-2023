@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Model;
 
 use App\Model\Iterator\AbstractIterator;
+use App\Model\Iterator\GeneratedIterator;
 use App\Model\Matrix\Area;
 use App\Model\Matrix\Column;
 use App\Model\Matrix\ColumnIterator;
@@ -175,6 +176,13 @@ class Matrix extends AbstractIterator
         };
     }
 
+    public function isBorderPoint(Point $point): bool
+    {
+        return $point->x === 0 || $point->y === 0
+            || $point->x === $this->getNumberOfColumns() - 1
+            || $point->y === $this->getNumberOfRows() - 1;
+    }
+
     public function set(int $rowIndex, int $columnIndex, mixed $value): static
     {
         if (!$this->hasCoordinate($rowIndex, $columnIndex)) {
@@ -187,6 +195,15 @@ class Matrix extends AbstractIterator
     public function setPoint(Point $point, mixed $value): static
     {
         return $this->set($point->getRow(), $point->getColumn(), $value);
+    }
+
+    public function setFromMatrix(Matrix $matrix, Point $offset = new Point(0, 0)): static
+    {
+        foreach ($matrix as $point => $value) {
+            /** @var Point $point */
+            $this->setPoint($point->offset($offset), $value);
+        }
+        return $this;
     }
     
     public function drawPath(Point $start, Point $destination, callable $valueGenerator): static
@@ -331,23 +348,25 @@ class Matrix extends AbstractIterator
      *                   fn (mixed $pointValue, Point $coordinate, Area $area)
      * @param callable|null $canBeStartOfNewArea Method to define whether a given point can be a start of a new area,
      *                   signature fn (mixed $pointValue, Point $coordinate, Matrix $matrix)
-     * @return Matrix\Area[]|\Generator
+     * @return Matrix\Area[]|GeneratedIterator
      */
-    public function getAreas(callable $belongsToArea, callable $canBeStartOfNewArea = null): \Generator
+    public function getAreas(callable $belongsToArea, callable $canBeStartOfNewArea = null): GeneratedIterator
     {
         if ($canBeStartOfNewArea === null) {
             $canBeStartOfNewArea = fn () => true;
         }
 
-        $visited = Matrix::fill($this->getNumberOfRows(), $this->getNumberOfColumns(), fn () => false);
-        foreach ($this as $point => $value) {
-            /** @var Point $point */
-            if ($visited->getPoint($point) || !$canBeStartOfNewArea($value, $point, $this)) {
-                continue;
-            }
+        return new GeneratedIterator(function () use ($belongsToArea, $canBeStartOfNewArea) {
+            $visited = Matrix::fill($this->getNumberOfRows(), $this->getNumberOfColumns(), fn() => false);
+            foreach ($this as $point => $value) {
+                /** @var Point $point */
+                if ($visited->getPoint($point) || !$canBeStartOfNewArea($value, $point, $this)) {
+                    continue;
+                }
 
-            yield $this->populateArea($point, $belongsToArea, $visited);
-        }
+                yield $this->populateArea($point, $belongsToArea, $visited);
+            }
+        });
     }
 
     private function populateArea(Point $startingPoint, callable $belongsToArea, Matrix $visited): Area

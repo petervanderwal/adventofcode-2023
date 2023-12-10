@@ -36,9 +36,11 @@ abstract class AbstractMatrixRowColumn extends AbstractMatrixIterator
 
     public function toString(?callable $characterPlotter = null): string
     {
+        $characterPlotter ??= fn (mixed $char) => $char instanceof \BackedEnum ? (string)$char->value : (string)$char;
+
         $result = '';
         foreach ($this as $character) {
-            $result .= $characterPlotter === null ? $character : $characterPlotter($character);
+            $result .= $characterPlotter($character);
         }
         return $result;
     }

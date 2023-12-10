@@ -28,6 +28,14 @@ abstract class AbstractIterator implements IteratorInterface
         return iterator_to_array($this);
     }
 
+    public function first(): mixed
+    {
+        foreach ($this as $item) {
+            return $item;
+        }
+        return null;
+    }
+
     public function keys(): KeyIterator
     {
         return new KeyIterator($this);
@@ -38,9 +46,19 @@ abstract class AbstractIterator implements IteratorInterface
         return new WhereIterator($this, $where);
     }
 
+    public function whereEquals(mixed $search): WhereIterator
+    {
+        return $this->where(fn (mixed $value) => $value === $search);
+    }
+
     public function map(callable $callback): MapIterator
     {
         return new MapIterator($this, $callback);
+    }
+
+    public function merge(): MergeIterator
+    {
+        return new MergeIterator($this);
     }
 
     public function max(): mixed
