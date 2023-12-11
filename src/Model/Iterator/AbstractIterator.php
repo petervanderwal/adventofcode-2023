@@ -28,6 +28,11 @@ abstract class AbstractIterator implements IteratorInterface
         return iterator_to_array($this);
     }
 
+    public function cacheIterator(): ArrayIterator
+    {
+        return new ArrayIterator($this->toArray());
+    }
+
     public function first(): mixed
     {
         foreach ($this as $item) {
@@ -87,6 +92,11 @@ abstract class AbstractIterator implements IteratorInterface
             }
         }
         return false;
+    }
+
+    public function hasEquals(mixed $search): bool
+    {
+        return $this->has(fn (mixed $value) => $value === $search);
     }
 
     public function all(callable $selector): bool
