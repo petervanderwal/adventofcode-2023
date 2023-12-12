@@ -10,12 +10,12 @@ use App\Utility\NumberUtility;
 
 class Day09 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         return $this->calculateAssignment($input, false);
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         return $this->calculateAssignment($input, true);
     }

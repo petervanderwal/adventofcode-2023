@@ -8,7 +8,7 @@ use App\Model\PuzzleInput;
 
 class Day01 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         return array_sum(
             $input->mapLines(
@@ -20,7 +20,7 @@ class Day01 extends AbstractPuzzle
         );
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         return array_sum(
             $input->mapLines(

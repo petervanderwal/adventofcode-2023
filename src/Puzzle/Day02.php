@@ -8,7 +8,7 @@ use App\Model\PuzzleInput;
 
 class Day02 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         $games = $this->parseInput($input);
 
@@ -30,7 +30,7 @@ class Day02 extends AbstractPuzzle
         return $answer;
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         $games = $this->parseInput($input);
 

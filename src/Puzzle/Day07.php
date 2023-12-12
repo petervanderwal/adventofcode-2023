@@ -11,7 +11,7 @@ use App\Utility\ArrayUtility;
 
 class Day07 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         $cardOrder = [
             2 => Card::TWO,
@@ -32,7 +32,7 @@ class Day07 extends AbstractPuzzle
         return $this->calculate($input, $this->getHandScoreMethod(false), ...$cardOrder);
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         $cardOrder = [
             1 => Card::JACK,

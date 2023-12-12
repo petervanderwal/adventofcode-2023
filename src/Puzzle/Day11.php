@@ -11,12 +11,12 @@ use App\Model\PuzzleInput;
 
 class Day11 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int
+    protected function doCalculateAssignment1(PuzzleInput $input): int
     {
         return $this->calculateSumOfManhattanDistances(...$this->getExpandedGalaxies($input));
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         return $this->calculateSumOfManhattanDistances(...$this->getExpandedGalaxies(
             $input,

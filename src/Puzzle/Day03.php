@@ -9,7 +9,7 @@ use App\Model\PuzzleInput;
 
 class Day03 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         $matrix = Matrix::read($input);
 
@@ -24,7 +24,7 @@ class Day03 extends AbstractPuzzle
         return $result;
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         $matrix = Matrix::read($input);
 

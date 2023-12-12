@@ -8,7 +8,7 @@ use App\Model\PuzzleInput;
 
 class Day04 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         $result = 0;
         foreach ($this->parseInput($input) as $amountWinning) {
@@ -21,7 +21,7 @@ class Day04 extends AbstractPuzzle
         return $result;
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         $result = 0;
         $futureCopies = [];

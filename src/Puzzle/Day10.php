@@ -12,12 +12,12 @@ use App\Model\PuzzleInput;
 
 class Day10 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int
+    protected function doCalculateAssignment1(PuzzleInput $input): int
     {
         return (int)ceil($this->walkLoops($input) / 2);
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int
+    protected function doCalculateAssignment2(PuzzleInput $input): int
     {
         /** @var Matrix $pipeBorderMatrix */
         $pipeBorderMatrix = null;

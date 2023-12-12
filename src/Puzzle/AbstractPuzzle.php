@@ -9,6 +9,7 @@ use App\Model\Parallel\Task;
 use App\Model\Parallel\TaskSet;
 use App\Model\PuzzleInput;
 use App\Service\Common\ContainerParametersHelperService;
+use App\Service\Common\ProgressService;
 use App\Service\Common\PuzzleInputService;
 use App\Utility\FileWriterUtility;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -22,21 +23,41 @@ abstract class AbstractPuzzle
     protected PuzzleInputService $puzzleInputService;
     protected KernelInterface $kernel;
     protected ContainerParametersHelperService $containerParametersHelperService;
+    protected ProgressService $progressService;
 
     #[Required]
     public function setAbstractRequirements(
         PuzzleInputService $puzzleInputService,
         KernelInterface $kernel,
         ContainerParametersHelperService $containerParametersHelperService,
+        ProgressService $progressService,
     ) {
         $this->puzzleInputService = $puzzleInputService;
         $this->kernel = $kernel;
         $this->containerParametersHelperService = $containerParametersHelperService;
+        $this->progressService = $progressService;
     }
 
-    abstract public function calculateAssignment1(PuzzleInput $input): int|string;
+    abstract protected function doCalculateAssignment1(PuzzleInput $input): int|string;
 
-    abstract public function calculateAssignment2(PuzzleInput $input): int|string;
+    abstract protected function doCalculateAssignment2(PuzzleInput $input): int|string;
+
+    public function calculateAssignment1(PuzzleInput $input): int|string
+    {
+        $this->initPuzzle(1, $input);
+        return $this->doCalculateAssignment1($input);
+    }
+
+    public function calculateAssignment2(PuzzleInput $input): int|string
+    {
+        $this->initPuzzle(2, $input);
+        return $this->doCalculateAssignment2($input);
+    }
+
+    private function initPuzzle(int $nr, PuzzleInput $input): void
+    {
+        $this->progressService->setCurrentPuzzle('day ' . $this->getDay() . ', part ' . $nr . ', ' . ($input->isDemoInput() ? 'demo' : 'full'));
+    }
 
     /**
      * @param array<string, PuzzleInput> $puzzleInputs

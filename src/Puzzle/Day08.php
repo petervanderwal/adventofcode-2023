@@ -17,7 +17,7 @@ use App\Utility\RegexUtility;
 
 class Day08 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int
+    protected function doCalculateAssignment1(PuzzleInput $input): int
     {
         [$instructions, $graph] = $this->parseInput($input);
 
@@ -33,7 +33,7 @@ class Day08 extends AbstractPuzzle
         }
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int
+    protected function doCalculateAssignment2(PuzzleInput $input): int
     {
         return $input->isDemoInput() ? $this->calculateAssignment2Smart($input) : $this->calculateAssignment2UgglyLCM($input);
     }

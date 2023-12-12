@@ -76,12 +76,12 @@ class DayService
             
             class Day{$day} extends AbstractPuzzle
             {
-                public function calculateAssignment1(PuzzleInput \$input): int|string
+                protected function doCalculateAssignment1(PuzzleInput \$input): int|string
                 {
                     // TODO: Implement calculateAssignment1() method.
                 }
             
-                public function calculateAssignment2(PuzzleInput \$input): int|string
+                protected function doCalculateAssignment2(PuzzleInput \$input): int|string
                 {
                     // TODO: Implement calculateAssignment2() method.
                 }

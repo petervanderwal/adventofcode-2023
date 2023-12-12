@@ -11,7 +11,7 @@ use App\Utility\NumberUtility;
 
 class Day05 extends AbstractPuzzle
 {
-    public function calculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int|string
     {
         [$seeds, $maps] = $this->parseInput($input);
         $result = PHP_INT_MAX;
@@ -21,7 +21,7 @@ class Day05 extends AbstractPuzzle
         return $result;
     }
 
-    public function calculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
         [$seedPairs, $maps] = $this->parseInput($input);
         $allRangesSourceStartPoints = $maps->getAllRangesSourceStartPoints();
