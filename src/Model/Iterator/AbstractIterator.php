@@ -46,6 +46,11 @@ abstract class AbstractIterator implements IteratorInterface
         return new KeyIterator($this);
     }
 
+    public function reverse(): AbstractIterator
+    {
+        return new ArrayIterator(array_reverse(iterator_to_array($this)));
+    }
+
     public function where(callable $where): WhereIterator
     {
         return new WhereIterator($this, $where);

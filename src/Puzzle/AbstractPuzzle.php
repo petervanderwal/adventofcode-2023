@@ -137,4 +137,11 @@ abstract class AbstractPuzzle
         $application->run($input, new ConsoleOutput());
         return $taskSet->getResults();
     }
+
+    protected function iterateSteps(int $start = 0, int $max = PHP_INT_MAX, int $step = 1): \Generator
+    {
+        for ($i = $start;; $i += $step) {
+            yield $i;
+        }
+    }
 }
