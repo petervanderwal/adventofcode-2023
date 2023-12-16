@@ -16,6 +16,9 @@ use App\Utility\IterableUtility;
 use Symfony\Component\String\UnicodeString;
 use Traversable;
 
+/**
+ * @template CellType
+ */
 class Matrix extends AbstractIterator
 {
     /**
@@ -152,6 +155,9 @@ class Matrix extends AbstractIterator
         return $this->hasCoordinate($point->getRow(), $point->getColumn());
     }
 
+    /**
+     * @return CellType
+     */
     public function get(int $rowIndex, int $columnIndex): mixed
     {
         if (!$this->hasCoordinate($rowIndex, $columnIndex)) {
@@ -160,6 +166,9 @@ class Matrix extends AbstractIterator
         return $this->rows[$rowIndex][$columnIndex];
     }
 
+    /**
+     * @return CellType
+     */
     public function getPoint(Point $point): mixed
     {
         return $this->get($point->getRow(), $point->getColumn());
@@ -183,6 +192,10 @@ class Matrix extends AbstractIterator
             || $point->y === $this->getNumberOfRows() - 1;
     }
 
+    /**
+     * @param CellType $value
+     * @return $this
+     */
     public function set(int $rowIndex, int $columnIndex, mixed $value): static
     {
         if (!$this->hasCoordinate($rowIndex, $columnIndex)) {
@@ -192,6 +205,9 @@ class Matrix extends AbstractIterator
         return $this;
     }
 
+    /**
+     * @param CellType $value
+     */
     public function setPoint(Point $point, mixed $value): static
     {
         return $this->set($point->getRow(), $point->getColumn(), $value);
