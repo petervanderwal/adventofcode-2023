@@ -7,6 +7,7 @@ namespace App\Model;
 use App\Model\Iterator\AbstractIterator;
 use App\Model\Iterator\GeneratedIterator;
 use App\Model\Matrix\Area;
+use App\Model\Matrix\BorderEntrance;
 use App\Model\Matrix\Column;
 use App\Model\Matrix\ColumnIterator;
 use App\Model\Matrix\MatchIterator;
@@ -407,5 +408,24 @@ class Matrix extends AbstractIterator
         } while (null !== $startingPoint = array_pop($pointsToCheck));
 
         return $area;
+    }
+
+    /**
+     * @return \Generator&iterable<int, BorderEntrance>
+     */
+    public function getBorderEntrances(): \Generator
+    {
+        foreach ($this->getRow(0)->keys() as $point) {
+            yield new BorderEntrance($point, Direction::SOUTH);
+        }
+        foreach ($this->getColumn($this->getNumberOfColumns() - 1)->keys() as $point) {
+            yield new BorderEntrance($point, Direction::WEST);
+        }
+        foreach ($this->getRow($this->getNumberOfRows() - 1)->keys() as $point) {
+            yield new BorderEntrance($point, Direction::NORTH);
+        }
+        foreach ($this->getColumn(0)->keys() as $point) {
+            yield new BorderEntrance($point, Direction::EAST);
+        }
     }
 }

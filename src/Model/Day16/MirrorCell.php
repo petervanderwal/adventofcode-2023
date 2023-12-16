@@ -36,6 +36,11 @@ class MirrorCell
         return !empty($this->visitedInputDirections);
     }
 
+    public function reset(): void
+    {
+        $this->visitedInputDirections = [];
+    }
+
     public function __toString(): string
     {
         if ($this->mirror !== Mirror::EMPTY) {

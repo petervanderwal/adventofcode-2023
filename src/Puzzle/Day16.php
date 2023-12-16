@@ -13,12 +13,30 @@ use App\Model\PuzzleInput;
 
 class Day16 extends AbstractPuzzle
 {
-    protected function doCalculateAssignment1(PuzzleInput $input): int|string
+    protected function doCalculateAssignment1(PuzzleInput $input): int
     {
-        /** @var Matrix<MirrorCell> $matrix */
-        $matrix = Matrix::read($input, fn (string $char) => new MirrorCell(Mirror::from($char)));
+        $matrix = $this->parseInput($input);
+        return $this->calculateEnergyLevel($matrix, $matrix->getCornerPoint(Direction::NORTH_WEST), Direction::EAST);
+    }
 
-        $beams = [[$matrix->getCornerPoint(Direction::NORTH_WEST), Direction::EAST]];
+    protected function doCalculateAssignment2(PuzzleInput $input): int
+    {
+        $matrix = $this->parseInput($input);
+
+        $result = 0;
+        foreach ($this->progressService->iterateWithProgressBar(iterator_to_array($matrix->getBorderEntrances())) as $entrance) {
+            $matrix->each(fn (MirrorCell $cell) => $cell->reset());
+            $result = max($result, $this->calculateEnergyLevel($matrix, $entrance->point, $entrance->direction));
+        }
+        return $result;
+    }
+
+    /**
+     * @param Matrix<MirrorCell> $matrix
+     */
+    private function calculateEnergyLevel(Matrix $matrix, Point $entrancePoint, Direction $entranceDirection): int
+    {
+        $beams = [[$entrancePoint, $entranceDirection]];
         while (count($beams)) {
             $nextRoundBeams = [];
             foreach ($beams as [$position, $inputDirection]) {
@@ -36,16 +54,14 @@ class Day16 extends AbstractPuzzle
             $beams = $nextRoundBeams;
         }
 
-        if ($input->isDemoInput()) {
-            echo "\n\n" . $matrix->plot();
-            echo "\n\n" . $matrix->plot(fn(MirrorCell $cell) => $cell->isEnergized() ? '#' : '.');
-        }
-
         return count($matrix->where(fn (MirrorCell $cell) => $cell->isEnergized()));
     }
 
-    protected function doCalculateAssignment2(PuzzleInput $input): int|string
+    /**
+     * @return Matrix<MirrorCell>
+     */
+    private function parseInput(PuzzleInput $input): Matrix
     {
-        // TODO: Implement calculateAssignment2() method.
+        return Matrix::read($input, fn (string $char) => new MirrorCell(Mirror::from($char)));
     }
 }

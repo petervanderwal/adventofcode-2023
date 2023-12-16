@@ -66,6 +66,14 @@ abstract class AbstractIterator implements IteratorInterface
         return new MapIterator($this, $callback);
     }
 
+    public function each(callable $callback): static
+    {
+        foreach ($this as $key => $value) {
+            $callback($value, $key);
+        }
+        return $this;
+    }
+
     public function merge(): MergeIterator
     {
         return new MergeIterator($this);
