@@ -17,14 +17,23 @@ class GraphBuilder
     public readonly AxisPoint $destinationVertex;
     public readonly Graph $graph;
 
-    public static function buildGraph(PuzzleInput $input): GraphBuilder
-    {
-        return (new self(Matrix::read($input, fn (string $char) => (int)$char)))
+    public static function buildGraph(
+        PuzzleInput $input,
+        int $minStepsInOneDirection,
+        int $maxStepsInOneDirection,
+    ): GraphBuilder {
+        return (new self(
+            Matrix::read($input, fn (string $char) => (int)$char),
+            $minStepsInOneDirection,
+            $maxStepsInOneDirection,
+        ))
             ->addEdges();
     }
 
     private function __construct(
         private readonly Matrix $matrix,
+        private readonly int $minStepsInOneDirection,
+        private readonly int $maxStepsInOneDirection,
     ) {
         $this->startVertex = new AxisPoint($this->matrix->getCornerPoint(Direction::NORTH_WEST));
         $this->destinationVertex = new AxisPoint($this->matrix->getCornerPoint(Direction::SOUTH_EAST));
@@ -56,20 +65,22 @@ class GraphBuilder
         $heatScore = 0;
         $axis = Axis::fromDirection($direction);
 
-        for ($steps = 1; $steps <= 3; $steps++) {
+        for ($steps = 1; $steps <= $this->maxStepsInOneDirection; $steps++) {
             $toPoint = $from->point->moveDirection($direction, $steps);
             if (!$this->matrix->hasPoint($toPoint)) {
                 break;
             }
-            $to = $toPoint->equals($this->destinationVertex->point)
-                ? $this->destinationVertex
-                : new AxisPoint($toPoint, $axis);
-
             $heatScore += $this->matrix->getPoint($toPoint);
-            $this->graph->addEdge(
-                new Edge($from, $to, $heatScore),
-                true
-            );
+
+            if ($steps >= $this->minStepsInOneDirection) {
+                $to = $toPoint->equals($this->destinationVertex->point)
+                    ? $this->destinationVertex
+                    : new AxisPoint($toPoint, $axis);
+                $this->graph->addEdge(
+                    new Edge($from, $to, $heatScore),
+                    true
+                );
+            }
         }
     }
 }

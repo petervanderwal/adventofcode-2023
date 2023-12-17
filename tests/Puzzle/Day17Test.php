@@ -11,4 +11,7 @@ class Day17Test extends AbstractPuzzleTest
 {
     protected int|string|array $expectedDemo1Value = 102;
     protected int|string|null $expectedAnswer1Value = 797;
+
+    protected int|string|array $expectedDemo2Value = 94;
+    protected int|string|null $expectedAnswer2Value = 914;
 }
