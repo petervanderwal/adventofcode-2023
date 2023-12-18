@@ -56,6 +56,7 @@ class Matrix extends AbstractIterator
     }
 
     public static function createFromPoints(
+        bool $allowOffset,
         callable $initialValueGenerator,
         callable $pointValueGenerator,
         Point ...$points
@@ -64,21 +65,26 @@ class Matrix extends AbstractIterator
             throw new \InvalidArgumentException('Points can\'t be empty', 231009195805);
         }
 
-        $maxRow = null;
-        $maxColumn = null;
+        $minRow = $minColumn = PHP_INT_MAX;
+        $maxRow = $maxColumn = PHP_INT_MIN;
         foreach ($points as $point) {
-            if ($maxRow === null) {
-                $maxRow = $point->getRow();
-                $maxColumn = $point->getColumn();
-            } else {
-                $maxRow = max($maxRow, $point->getRow());
-                $maxColumn = max($maxColumn, $point->getColumn());
-            }
+            $minRow = min($minRow, $point->getRow());
+            $minColumn = min($minColumn, $point->getColumn());
+            $maxRow = max($maxRow, $point->getRow());
+            $maxColumn = max($maxColumn, $point->getColumn());
         }
 
-        $matrix = static::fill($maxRow + 1, $maxColumn + 1, $initialValueGenerator);
+        if ($allowOffset) {
+            $offset = new Point($minRow, $minColumn);
+        } elseif ($minRow < 0 || $minColumn < 0) {
+            throw new \InvalidArgumentException('Can\'t create matrix with points down to ' . $minRow . ',' . $minColumn, 231218172132);
+        } else {
+            $minRow = $minColumn = 0;
+        }
+
+        $matrix = static::fill(($maxRow - $minRow) + 1, ($maxColumn - $minColumn) + 1, $initialValueGenerator);
         foreach ($points as $index => $point) {
-            $matrix->setPoint($point, $pointValueGenerator($point, $index));
+            $matrix->setPoint($point->moveXY(-$minColumn, -$minRow), $pointValueGenerator($point, $index));
         }
         return $matrix;
     }

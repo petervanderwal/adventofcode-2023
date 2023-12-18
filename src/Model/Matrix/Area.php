@@ -38,4 +38,14 @@ class Area extends AbstractArrayIterator
         $this->points[] = $point;
         return $this;
     }
+
+    public function isBorderArea(): bool
+    {
+        return $this->has(fn (Point $point) => $this->matrix->isBorderPoint($point));
+    }
+
+    public function getSize(): int
+    {
+        return count($this);
+    }
 }
