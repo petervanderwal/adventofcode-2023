@@ -23,4 +23,13 @@ class NumberUtility
     {
         return RegexUtility::extractAll('/-?[0-9]+/', $line, parse: fn (string $val) => (int)$val);
     }
+
+    public static function positiveModulo(int $number, int $divider): int
+    {
+        $result = $number % $divider;
+        if ($result < 0) {
+            $result += $divider;
+        }
+        return $result;
+    }
 }

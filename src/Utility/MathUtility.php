@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Utility;
 
+use App\Model\Point;
+
 class MathUtility
 {
     /**
@@ -43,5 +45,18 @@ class MathUtility
         $max = (int)max($a, $b);
         $min = (int)min($a, $b);
         return $min === 0 ? $max : static::_greatestCommonDivisor($min, $max % $min);
+    }
+
+    public static function shoelaceFormula(Point ...$points): float
+    {
+        // https://en.wikipedia.org/wiki/Shoelace_formula
+        // and https://artofproblemsolving.com/wiki/index.php/Shoelace_Theorem
+
+        $sum = 0;
+        foreach ($points as $index => $leftPoint) {
+            $rightPoint = $points[($index + 1) % count($points)];
+            $sum += $leftPoint->x * $rightPoint->y - $leftPoint->y * $rightPoint->x;
+        }
+        return abs($sum) / 2;
     }
 }

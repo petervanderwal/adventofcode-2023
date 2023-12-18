@@ -5,72 +5,70 @@ declare(strict_types=1);
 namespace App\Puzzle;
 
 use App\Model\Direction;
-use App\Model\Matrix;
 use App\Model\Point;
 use App\Model\PuzzleInput;
+use App\Utility\MathUtility;
+use App\Utility\NumberUtility;
 
 class Day18 extends AbstractPuzzle
 {
     protected function doCalculateAssignment1(PuzzleInput $input): int
     {
-        $matrix = $this->buildMatrix($input);
-
-        $isEmpty = fn(?string $color) => $color === null;
-        $innerAreaSize = (int)$matrix->getAreas($isEmpty, $isEmpty)
-            ->where(fn (Matrix\Area $area) => !$area->isBorderArea())
-            ->map(fn (Matrix\Area $area) => $area->getSize())
-            ->sum();
-
-        $borderAreaSize = count($matrix->where(fn (?string $color) => $color !== null));
-
-        return $innerAreaSize + $borderAreaSize;
+        return $this->calculate($input, fn (string $column1, string $column2) => [
+            match ($column1) {
+                'U' => Direction::NORTH,
+                'R' => Direction::EAST,
+                'D' => Direction::SOUTH,
+                'L' => Direction::WEST,
+            },
+            (int)$column2
+        ]);
     }
 
-    protected function doCalculateAssignment2(PuzzleInput $input): int|string
+    protected function doCalculateAssignment2(PuzzleInput $input): int
     {
-        // TODO: Implement calculateAssignment2() method.
+        return $this->calculate($input, fn (string $column1, string $column2, string $column3) => [
+            match ($column3[7]) {
+                '0' => Direction::EAST,
+                '1' => Direction::SOUTH,
+                '2' => Direction::WEST,
+                '3' => Direction::NORTH,
+            },
+            hexdec(substr($column3, 2, 5))
+        ]);
+
     }
 
-    private function buildMatrix(PuzzleInput $input): Matrix
+    private function calculate(PuzzleInput $input, callable $getInfo): int
     {
-        $lines = $this->parseInput($input);
+        $data = $input->mapLines(fn (string $line) => $getInfo(...explode(' ', $line)));
 
         $points = [$currentPoint = new Point(0, 0)];
-        $colors = [];
-        foreach ($lines as [$direction, $amount, $color]) {
-            for ($i = 0; $i < $amount; $i++) {
-                $points[] = $currentPoint = $currentPoint->moveDirection($direction);
-                $colors[(string)$currentPoint] = $color;
+        foreach ($data as $index => [$direction, $amount]) {
+            $previousDirection = $data[NumberUtility::positiveModulo($index - 1, count($data))][0];
+            $nextDirection = $data[NumberUtility::positiveModulo($index + 1, count($data))][0];
+
+            if ($nextDirection !== $previousDirection) {
+                // Any S shape
+                //   .#....
+                //   .#....
+                //   .####.
+                //   ....#.
+                //   ....#.
+                // Always has the exact length as given
+
+                // For any U shape we either need to add 1 or subtract 1
+                $amount += match ($direction) {
+                    Direction::EAST => $nextDirection === Direction::SOUTH ? 1 : -1,
+                    Direction::WEST => $nextDirection === Direction::NORTH ? 1 : -1,
+                    Direction::NORTH => $nextDirection === Direction::EAST ? 1 : -1,
+                    Direction::SOUTH => $nextDirection === Direction::WEST ? 1 : -1,
+                };
             }
+
+            $points[] = $currentPoint = $currentPoint->moveDirection($direction, $amount);
         }
 
-        return Matrix::createFromPoints(
-            true,
-            fn () => null,
-            fn (Point $point) => $colors[(string)$point],
-            ...$points
-        );
-    }
-
-    /**
-     * @return array<int, array{0: Direction, 1: int, 2: string}>
-     */
-    private function parseInput(PuzzleInput $input): array
-    {
-        return $input->mapLines(
-            function (string $line) {
-                [$direction, $amount, $color] = explode(' ', $line);
-                return [
-                    match ($direction) {
-                        'U' => Direction::NORTH,
-                        'R' => Direction::EAST,
-                        'D' => Direction::SOUTH,
-                        'L' => Direction::WEST,
-                    },
-                    (int)$amount,
-                    trim($color, '()'),
-                ];
-            }
-        );
+        return (int)MathUtility::shoelaceFormula(...$points);
     }
 }
