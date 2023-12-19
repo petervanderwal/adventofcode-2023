@@ -99,6 +99,11 @@ class ArrayUtility
         return $array[array_key_first($array)];
     }
 
+    /**
+     * @template T
+     * @param array<array-key, T> $array
+     * @return T
+     */
     public static function last(array $array): mixed
     {
         if (empty($array)) {
