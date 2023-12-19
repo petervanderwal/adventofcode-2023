@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Puzzle;
 
+use App\Model\Day19\Condition;
+use App\Model\Day19\ConditionSet;
+use App\Model\Day19\RangeCondition;
 use App\Model\Day19\WorkflowSet;
 use App\Model\PuzzleInput;
 use App\Utility\NumberUtility;
@@ -20,7 +23,24 @@ class Day19 extends AbstractPuzzle
 
     protected function doCalculateAssignment2(PuzzleInput $input): int
     {
-        // Brute force will take 12.5 years to solve
+        [$workflowSet] = $this->parseInput($input);
+
+        $entrance = (new ConditionSet())
+            ->and(Condition::fromString('x>0'))
+            ->and(Condition::fromString('x<4001'))
+            ->and(Condition::fromString('m>0'))
+            ->and(Condition::fromString('m<4001'))
+            ->and(Condition::fromString('a>0'))
+            ->and(Condition::fromString('a<4001'))
+            ->and(Condition::fromString('s>0'))
+            ->and(Condition::fromString('s<4001'));
+
+        return array_sum(
+            array_map(
+                fn (ConditionSet $conditionSet) => $conditionSet->getSize(),
+                $workflowSet->getAcceptingConditions($entrance)
+            )
+        );
     }
 
     /**

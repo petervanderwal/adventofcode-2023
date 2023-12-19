@@ -69,4 +69,54 @@ class WorkflowSet
         }
         return $nameOfWorkflow === static::DESTINATION_ACCEPT;
     }
+
+    /**
+     * @param ConditionSet $constraint
+     * @return ConditionSet[]
+     */
+    public function getAcceptingConditions(ConditionSet $constraint = new ConditionSet()): array
+    {
+        $toCheck = [self::ENTRANCE_WORKFLOW => [$constraint]];
+        $result = [];
+
+        while (count($toCheck)) {
+            $newToCheck = [];
+
+            foreach ($toCheck as $workflowName => $constraints) {
+                $workflow = $this->workflows[$workflowName];
+
+                foreach ($constraints as $constraint) {
+                    foreach ($workflow->getSteps() as $step) {
+                        if ($constraint === null) {
+                            break;
+                        }
+
+                        if (null !== $yesCondition = $constraint->and($step->getCondition())) {
+                            if ($step->getDestination() === self::DESTINATION_ACCEPT) {
+                                $result[] = $yesCondition;
+                            } elseif ($step->getDestination() !== self::DESTINATION_REJECT) {
+                                $newToCheck[$step->getDestination()][] = $yesCondition;
+                            }
+                        }
+
+                        // Constraint for next step in workflow is the negation of this condition
+                        $constraint = $constraint->and($step->getCondition()->not());
+                    }
+
+                    if ($constraint !== null) {
+                        // Constraint for the final destination of this workflow
+                        if ($workflow->getFinalDestination() === self::DESTINATION_ACCEPT) {
+                            $result[] = $constraint;
+                        } elseif ($workflow->getFinalDestination() !== self::DESTINATION_REJECT) {
+                            $newToCheck[$workflow->getFinalDestination()][] = $constraint;
+                        }
+                    }
+                }
+            }
+
+            $toCheck = $newToCheck;
+        }
+
+        return $result;
+    }
 }

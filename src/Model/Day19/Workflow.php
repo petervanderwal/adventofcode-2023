@@ -80,4 +80,12 @@ class Workflow
         }
         return $this->finalDestination;
     }
+
+    /**
+     * @return WorkflowStep[]
+     */
+    public function getSteps(): array
+    {
+        return $this->workflowSteps;
+    }
 }

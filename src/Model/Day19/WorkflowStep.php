@@ -7,21 +7,22 @@ namespace App\Model\Day19;
 class WorkflowStep
 {
     public function __construct(
-        private string $testField,
-        private string $condition,
-        private int $comparedValue,
+        private Condition $condition,
         private string $destination,
     ) {}
 
     public static function fromString(string $string): self
     {
-        [$fullCondition, $destination] = explode(':', $string);
+        [$condition, $destination] = explode(':', $string);
         return new self(
-            $fullCondition[0],
-            $fullCondition[1],
-            (int)substr($fullCondition, 2),
+            Condition::fromString($condition),
             $destination
         );
+    }
+
+    public function getCondition(): Condition
+    {
+        return $this->condition;
     }
 
     public function getDestination(): string
@@ -31,11 +32,7 @@ class WorkflowStep
 
     public function solve(array $part): ?string
     {
-        $value = $part[$this->testField];
-        return match($this->condition) {
-            '>' => $value > $this->comparedValue,
-            '<' => $value < $this->comparedValue
-        } ? $this->destination : null;
+        return $this->condition->matches($part) ? $this->destination : null;
     }
 
     public function updateDestination(string $from, string $to): bool
