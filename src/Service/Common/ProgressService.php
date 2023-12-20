@@ -41,4 +41,10 @@ class ProgressService
 
         fwrite(STDOUT, "\n");
     }
+
+    public function showProgressBar(\Generator $generator, string $message = ''): void
+    {
+        /** @noinspection PhpStatementHasEmptyBodyInspection */
+        foreach ($this->iterateWithProgressBar($generator) as $unused) {}
+    }
 }

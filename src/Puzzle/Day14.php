@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Puzzle;
 
+use App\Algorithm\LoopDetection;
 use App\Model\Direction;
 use App\Model\Matrix;
 use App\Model\Point;
@@ -15,41 +16,35 @@ class Day14 extends AbstractPuzzle
     {
         $grid = Matrix::read($input);
         $this->tilt($grid, Direction::NORTH);
-        return $this->calculateGridData($grid)[0];
+        return $grid->whereEquals('O')
+            ->keys()
+            ->map(fn (Point $point) => $grid->getNumberOfRows() - $point->getRow())
+            ->sum();
     }
 
     protected function doCalculateAssignment2(PuzzleInput $input): int
     {
-        $grid = Matrix::read($input);
-        [$score, $state] = $this->calculateGridData($grid);
-        $repeatScores = [$score];
-        $repeatStates = [$state];
-        $maxCycles = 1000000000;
-
-        foreach ($this->progressService->iterateWithProgressBar($this->iterateSteps(1, $maxCycles)) as $cycle) {
-            $this->cycle($grid);
-
-            [$score, $state] = $this->calculateGridData($grid);
-
-            // Try to find a loop
-            if (false !== $loopStart = array_search($state, $repeatStates)) {
-                $loopLength = $cycle - $loopStart;
-                $positionWithinLoop = ($maxCycles - $loopStart) % $loopLength;
-                return $repeatScores[$positionWithinLoop + $loopStart];
+        $loopDetection = new LoopDetection(
+            1000000000,
+            function (LoopDetection\Step $initialStep) use ($input) {
+                $this->populateStepFromGrid($initialStep, Matrix::read($input));
+            },
+            function (LoopDetection\Step $step, Matrix $grid) {
+                $this->populateStepFromGrid($step, $this->cycle($grid));
             }
+        );
 
-            $repeatScores[] = $score;
-            $repeatStates[] = $state;
-        }
+        $this->progressService->showProgressBar($loopDetection->iterate());
 
-        return $this->calculateGridData($grid)[0];
+        return $loopDetection->getRepeatingEndScore();
     }
 
-    private function cycle(Matrix $grid): void
+    private function cycle(Matrix $grid): Matrix
     {
         foreach ([Direction::NORTH, Direction::WEST, Direction::SOUTH, Direction::EAST] as $direction) {
             $this->tilt($grid, $direction);
         }
+        return $grid;
     }
 
     private function tilt(Matrix $grid, Direction $direction): void
@@ -76,10 +71,7 @@ class Day14 extends AbstractPuzzle
         }
     }
 
-    /**
-     * @return array{0: int, 1: string}
-     */
-    private function calculateGridData(Matrix $grid): array
+    private function populateStepFromGrid(LoopDetection\Step $step, Matrix $grid): void
     {
         $score = 0;
         $points = [];
@@ -90,6 +82,8 @@ class Day14 extends AbstractPuzzle
             $points[] = (string)$point;
         }
 
-        return [$score, implode('|', $points)];
+        $step->setState($grid)
+            ->setStateStringRepresentation(implode('|', $points))
+            ->setScore($score);
     }
 }
