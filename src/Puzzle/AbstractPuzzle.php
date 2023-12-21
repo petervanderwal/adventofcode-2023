@@ -12,6 +12,7 @@ use App\Service\Common\ContainerParametersHelperService;
 use App\Service\Common\ProgressService;
 use App\Service\Common\PuzzleInputService;
 use App\Utility\FileWriterUtility;
+use Fidry\CpuCoreCounter\CpuCoreCounter;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -139,9 +140,10 @@ abstract class AbstractPuzzle
             ]
         );
 
-        // \Webmozarts\Console\Parallelization\ParallelExecutorFactory::getScriptPath() requires this key to be set and
-        // will cause an error if it isn't...
-        $_SERVER['PWD'] = $_SERVER['PWD'] ?? getcwd();
+        if (!isset($_ENV['WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT'])) {
+            // Run 3x the amount of CPU's, that'll push the CPU to the limit :)
+            $_ENV['WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT'] = (new CpuCoreCounter())->getCount() * 3;
+        }
 
         try {
             $application->run($input, new ConsoleOutput());
