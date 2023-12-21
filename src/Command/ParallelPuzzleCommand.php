@@ -4,17 +4,12 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Model\Parallel\NullProgressBarFactory;
-use App\Model\Parallel\ParallelLogger;
 use App\Model\Parallel\TaskSet;
 use App\Puzzle\AbstractPuzzle;
 use App\Service\Common\ContainerParametersHelperService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Terminal;
-use Webmozarts\Console\Parallelization\Logger\Logger;
-use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 
@@ -52,18 +47,6 @@ class ParallelPuzzleCommand extends ParallelCommand
             ->withSegmentSize(1)
             ->withBatchSize(1)
             ->withScriptPath($this->containerParametersHelperService->getApplicationRootDir() . '/bin/console');
-    }
-
-    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
-    {
-        return new ParallelLogger(
-            new StandardLogger(
-                $input,
-                $output,
-                (new Terminal())->getWidth(),
-                new NullProgressBarFactory(),
-            )
-        );
     }
 
     protected function fetchItems(InputInterface $input, OutputInterface $output): iterable
