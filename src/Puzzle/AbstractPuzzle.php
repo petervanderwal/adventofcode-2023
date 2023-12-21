@@ -15,6 +15,7 @@ use App\Utility\FileWriterUtility;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -115,9 +116,17 @@ abstract class AbstractPuzzle
 
     protected function runParallel(TaskSet $taskSet): array
     {
-        $resultsFolder = $this->containerParametersHelperService->getCacheDir() . '/parallel-results';
-        FileWriterUtility::ensureDir($resultsFolder);
-        $taskSet->setResultsFile(tempnam($resultsFolder, 'results.'));
+        $resultsFile = (new Filesystem())->tempnam(
+            FileWriterUtility::ensureDir(
+                $this->containerParametersHelperService->getCacheDir() . '/parallel-puzzle-job'
+            ),
+            '',
+            '.results.ser'
+        );
+        $taskSet->setResultsFile($resultsFile);
+
+        $serializedTaskSetFile = substr($resultsFile, 0, -12) . '.task-set.ser';
+        file_put_contents($serializedTaskSetFile, serialize($taskSet));
 
         $application = new Application($this->kernel);
         $application->setAutoExit(false);
@@ -126,7 +135,7 @@ abstract class AbstractPuzzle
             [
                 'command' => ParallelPuzzleCommand::COMMAND_NAME,
                 '--' . ParallelPuzzleCommand::OPTION_PUZZLE_DAY => $this->getDay(),
-                '--' . ParallelPuzzleCommand::OPTION_TASK_SET => base64_encode(serialize($taskSet)),
+                '--' . ParallelPuzzleCommand::OPTION_TASK_SET => $serializedTaskSetFile,
             ]
         );
 
@@ -134,8 +143,13 @@ abstract class AbstractPuzzle
         // will cause an error if it isn't...
         $_SERVER['PWD'] = $_SERVER['PWD'] ?? getcwd();
 
-        $application->run($input, new ConsoleOutput());
-        return $taskSet->getResults();
+        try {
+            $application->run($input, new ConsoleOutput());
+            return $taskSet->getResults();
+        } finally {
+            @unlink($resultsFile);
+            @unlink($serializedTaskSetFile);
+        }
     }
 
     protected function iterateSteps(int $start = 0, int $max = PHP_INT_MAX, int $step = 1): \Generator

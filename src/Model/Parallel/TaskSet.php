@@ -36,17 +36,16 @@ class TaskSet
         return $this;
     }
 
-
-    public function getPuzzleDay(): string
-    {
-        return $this->puzzleDay;
-    }
-
     /**
      * @return Task[]
      */
     public function getTasks(): array
     {
         return $this->tasks;
+    }
+
+    public function getTask(int|string $taskIndex): Task
+    {
+        return $this->tasks[$taskIndex];
     }
 }

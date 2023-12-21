@@ -6,7 +6,6 @@ namespace App\Command;
 
 use App\Model\Parallel\NullProgressBarFactory;
 use App\Model\Parallel\ParallelLogger;
-use App\Model\Parallel\Task;
 use App\Model\Parallel\TaskSet;
 use App\Puzzle\AbstractPuzzle;
 use App\Service\Common\ContainerParametersHelperService;
@@ -69,30 +68,25 @@ class ParallelPuzzleCommand extends ParallelCommand
 
     protected function fetchItems(InputInterface $input, OutputInterface $output): iterable
     {
-        $taskSet = $this->unserialize($input->getOption(self::OPTION_TASK_SET));
-        if (!$taskSet instanceof TaskSet) {
-            throw new \InvalidArgumentException('Given task set should be TaskSet', 221221173329);
-        }
-
+        $taskSet = $this->getTaskSet($taskSetFile = $input->getOption(self::OPTION_TASK_SET));
         $puzzle = $this->getPuzzle($input);
 
         $items = [];
-        foreach ($taskSet->getTasks() as $task) {
+        foreach ($taskSet->getTasks() as $taskIndex => $task) {
             if (!is_callable([$puzzle, $task->getMethodName()])) {
                 throw new \InvalidArgumentException(sprintf('Task %s::%s is not callable', get_class($puzzle), $task->getMethodName()), 221221174356);
             }
 
-            $items[] = $this->serialize($task);
+            $items[] = $taskIndex . '@' . $taskSetFile;
         }
         return $items;
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
-        $task = $this->unserialize($item);
-        if (!$task instanceof Task) {
-            throw new \InvalidArgumentException('Given task should be Task', 221221174443);
-        }
+        [$taskIndex, $taskSetFile] = explode('@', $item, 2);
+        $taskSet = $this->getTaskSet($taskSetFile);
+        $task = $taskSet->getTask($taskIndex);
 
         $puzzle = $this->getPuzzle($input);
         $taskResult = $puzzle->{$task->getMethodName()}(...$task->getArguments());
@@ -117,13 +111,8 @@ class ParallelPuzzleCommand extends ParallelCommand
         return $this->getContainer()->get($puzzleClass);
     }
 
-    protected function serialize(mixed $data): string
+    protected function getTaskSet(string $taskSetFile): TaskSet
     {
-        return base64_encode(serialize($data));
-    }
-
-    protected function unserialize(string $serialized): mixed
-    {
-        return unserialize(base64_decode($serialized));
+        return unserialize(file_get_contents($taskSetFile));
     }
 }

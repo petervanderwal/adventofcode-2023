@@ -23,10 +23,11 @@ class FileWriterUtility
         fclose($handle);
     }
 
-    public static function ensureDir(string $dir): void
+    public static function ensureDir(string $dir): string
     {
         if (!is_dir($dir)) {
             mkdir($dir, recursive: true);
         }
+        return $dir;
     }
 }
