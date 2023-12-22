@@ -45,7 +45,11 @@ class GraphBuilder
 
     private function addPointToGraph(Point $point, mixed $value): void
     {
-        foreach ($this->allowDiagonalSteps ? Direction::cases() : Direction::straightCases() as $direction) {
+        $directions = Direction::straightCases();
+        if ($this->allowDiagonalSteps) {
+            $directions = [...$directions, ...Direction::diagonalCases()];
+        }
+        foreach ($directions as $direction) {
             $this->addEdgeToGraph($point, $value, $point->moveDirection($direction), $direction);
         }
     }

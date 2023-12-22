@@ -14,6 +14,12 @@ enum Direction
     case SOUTH_EAST;
     case SOUTH_WEST;
 
+    case UP;
+    case DOWN;
+
+    /**
+     * @return Direction[]
+     */
     public static function straightCases(): array
     {
         return [
@@ -21,6 +27,30 @@ enum Direction
             self::EAST,
             self::SOUTH,
             self::WEST
+        ];
+    }
+
+    /**
+     * @return Direction[]
+     */
+    public static function diagonalCases(): array
+    {
+        return [
+            self::NORTH_EAST,
+            self::NORTH_WEST,
+            self::SOUTH_WEST,
+            self::SOUTH_EAST,
+        ];
+    }
+
+    /**
+     * @return Direction[]
+     */
+    public static function verticalCases(): array
+    {
+        return [
+            self::UP,
+            self::DOWN,
         ];
     }
 
@@ -77,6 +107,9 @@ enum Direction
             self::SOUTH_EAST => self::NORTH_WEST,
             self::SOUTH_WEST => self::NORTH_EAST,
             self::NORTH_WEST => self::SOUTH_EAST,
+
+            self::UP => self::DOWN,
+            self::DOWN => self::UP,
         };
     }
 
@@ -94,6 +127,15 @@ enum Direction
         return match($this) {
             self::NORTH, self::NORTH_EAST, self::NORTH_WEST => -1,
             self::SOUTH, self::SOUTH_EAST, self::SOUTH_WEST => 1,
+            default => 0,
+        };
+    }
+
+    public function getZStep(): int
+    {
+        return match($this) {
+            self::UP => 1,
+            self::DOWN => -1,
             default => 0,
         };
     }

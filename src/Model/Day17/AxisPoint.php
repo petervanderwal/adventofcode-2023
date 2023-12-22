@@ -7,7 +7,7 @@ namespace App\Model\Day17;
 use App\Algorithm\ShortestPath\VertexInterface;
 use App\Model\Point;
 
-class AxisPoint extends Point
+class AxisPoint implements VertexInterface
 {
     public function __construct(
         public readonly Point $point,
