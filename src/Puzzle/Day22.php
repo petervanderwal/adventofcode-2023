@@ -35,7 +35,46 @@ class Day22 extends AbstractPuzzle
 
     protected function doCalculateAssignment2(PuzzleInput $input): int|string
     {
-        // TODO: Implement calculateAssignment2() method.
+        return $this->getTower($input)->map(
+            function (Block $blockToRemove): int {
+                $fallingBlocks = [];
+
+                $blocksToTest = $blockToRemove->getIsCarryingBlocks();
+                while (count($blocksToTest)) {
+                    $newBlocksToTest = [];
+
+                    foreach ($blocksToTest as $block) {
+                        if (
+                            in_array($block, $fallingBlocks, true)
+                            || !$this->isBlockFalling($block, $blockToRemove, ...$fallingBlocks)
+                        ) {
+                            continue;
+                        }
+
+                        $fallingBlocks[] = $block;
+                        foreach ($block->getIsCarryingBlocks() as $carryingBlock) {
+                            if (!in_array($carryingBlock, $newBlocksToTest, true)) {
+                                $newBlocksToTest[] = $carryingBlock;
+                            }
+                        }
+                    }
+
+                    $blocksToTest = $newBlocksToTest;
+                }
+
+                return count($fallingBlocks);
+            }
+        )->sum();
+    }
+
+    private function isBlockFalling(Block $block, Block ...$fallingBlocks): bool
+    {
+        foreach ($block->getIsRestingOnBlocks() as $blockIsRestingOn) {
+            if (!in_array($blockIsRestingOn, $fallingBlocks, true)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function getTower(PuzzleInput $input): Tower
