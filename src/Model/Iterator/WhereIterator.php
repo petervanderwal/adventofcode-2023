@@ -6,13 +6,22 @@ namespace App\Model\Iterator;
 
 use Traversable;
 
+/**
+ * @template TKey
+ * @template TValue
+ * @extends AbstractIterator<TKey, TValue>
+ */
 class WhereIterator extends AbstractIterator
 {
     /**
-     * @var callable
+     * @var callable(TValue): bool
      */
     protected \Closure|string|array $where;
 
+    /**
+     * @param AbstractIterator<TKey, TValue> $iterator
+     * @param callable(TValue): bool $where
+     */
     public function __construct(
         protected AbstractIterator $iterator,
         callable $where

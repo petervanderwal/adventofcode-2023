@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Model\Iterator;
 
+/**
+ * @template TKey
+ * @template TValue
+ */
 abstract class AbstractIterator implements IteratorInterface
 {
     public function count(): int
@@ -28,11 +32,17 @@ abstract class AbstractIterator implements IteratorInterface
         return iterator_to_array($this);
     }
 
+    /**
+     * @return ArrayIterator<TKey, TValue>
+     */
     public function cacheIterator(): ArrayIterator
     {
         return new ArrayIterator($this->toArray());
     }
 
+    /**
+     * @return TValue
+     */
     public function first(): mixed
     {
         foreach ($this as $item) {
@@ -41,11 +51,17 @@ abstract class AbstractIterator implements IteratorInterface
         return null;
     }
 
+    /**
+     * @return KeyIterator<TKey>
+     */
     public function keys(): KeyIterator
     {
         return new KeyIterator($this);
     }
 
+    /**
+     * @return AbstractIterator<TKey, TValue>
+     */
     public function reverse(): AbstractIterator
     {
         return new ArrayIterator(array_reverse(iterator_to_array($this)));
@@ -56,6 +72,10 @@ abstract class AbstractIterator implements IteratorInterface
         return new WhereIterator($this, $where);
     }
 
+    /**
+     * @param TValue $search
+     * @return WhereIterator<TKey, TValue>
+     */
     public function whereEquals(mixed $search): WhereIterator
     {
         return $this->where(fn (mixed $value) => $value === $search);
@@ -66,6 +86,10 @@ abstract class AbstractIterator implements IteratorInterface
         return new MapIterator($this, $callback);
     }
 
+    /**
+     * @param callable(TValue, TKey): void $callback
+     * @return $this
+     */
     public function each(callable $callback): static
     {
         foreach ($this as $key => $value) {
@@ -74,6 +98,9 @@ abstract class AbstractIterator implements IteratorInterface
         return $this;
     }
 
+    /**
+     * @return MergeIterator<TKey, TValue>
+     */
     public function merge(): MergeIterator
     {
         return new MergeIterator($this);
@@ -97,6 +124,9 @@ abstract class AbstractIterator implements IteratorInterface
         return $result;
     }
 
+    /**
+     * @param callable(TValue): bool $selector
+     */
     public function has(callable $selector): bool
     {
         foreach ($this as $item) {
@@ -107,11 +137,18 @@ abstract class AbstractIterator implements IteratorInterface
         return false;
     }
 
+    /**
+     * @param TValue $search
+     */
     public function hasEquals(mixed $search): bool
     {
         return $this->has(fn (mixed $value) => $value === $search);
     }
 
+    /**
+     * @param callable(TValue): bool $selector
+     * @return bool
+     */
     public function all(callable $selector): bool
     {
         foreach ($this as $item) {
@@ -134,6 +171,12 @@ abstract class AbstractIterator implements IteratorInterface
         ) ?? '';
     }
 
+    /**
+     * @template TReducedType
+     * @param callable(TReducedType $carry, TValue $item): TReducedType $callback
+     * @param TReducedType|null $initial
+     * @return TReducedType|null
+     */
     public function reduce(callable $callback, mixed $initial = null): mixed
     {
         foreach ($this as $item) {

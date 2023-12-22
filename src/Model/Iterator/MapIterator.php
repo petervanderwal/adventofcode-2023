@@ -6,13 +6,22 @@ namespace App\Model\Iterator;
 
 use Traversable;
 
+/**
+ * @template TIteratorValue
+ * @template TMappedValue
+ * @extends AbstractIterator<int, TMappedValue>
+ */
 class MapIterator extends AbstractIterator
 {
     /**
-     * @var callable
+     * @var callable(TIteratorValue): TMappedValue
      */
     protected \Closure|string|array $callback;
 
+    /**
+     * @param AbstractIterator<mixed, TIteratorValue> $iterator
+     * @param callable(TIteratorValue): TMappedValue $callback
+     */
     public function __construct(
         protected AbstractIterator $iterator,
         callable $callback

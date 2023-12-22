@@ -6,8 +6,15 @@ namespace App\Model\Iterator;
 
 use Traversable;
 
+/**
+ * @template TKey
+ * @extends AbstractIterator<int, TKey>
+ */
 class KeyIterator extends AbstractIterator
 {
+    /**
+     * @param AbstractIterator<TKey, mixed> $iterator
+     */
     public function __construct(
         protected AbstractIterator $iterator,
     ) {}
