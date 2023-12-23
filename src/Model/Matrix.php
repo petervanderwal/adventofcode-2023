@@ -34,6 +34,11 @@ class Matrix extends AbstractIterator
         $this->addRows(...$rows);
     }
 
+    /**
+     * @template TCallableCellType
+     * @param callable(string, Point): TCallableCellType|null $characterConverter
+     * @return Matrix<TCallableCellType>
+     */
     public static function read(UnicodeString $string, ?callable $characterConverter = null): static
     {
         $rows = [];
