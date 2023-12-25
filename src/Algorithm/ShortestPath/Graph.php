@@ -78,6 +78,18 @@ class Graph implements GraphInterface
         return $this->edges[$from->getVertexIdentifier()] ?? [];
     }
 
+    /**
+     * @return EdgeInterface
+     */
+    public function getAllEdges(): array
+    {
+        $result = [];
+        foreach ($this->edges as $edges) {
+            $result = [...$result, ...array_values($edges)];
+        }
+        return $result;
+    }
+
     public function addEdge(EdgeInterface $edge, bool $addVertices = false): static
     {
         $fromId = $this->ensureVertex($edge->getFomVertex(), $addVertices, 'Edge-from');
@@ -87,6 +99,18 @@ class Graph implements GraphInterface
         }
         $this->edges[$fromId][$toId] = $edge;
         return $this;
+    }
+
+    public function removeEdgeByVertices(string|VertexInterface $from, string|VertexInterface $to): EdgeInterface
+    {
+        $fromId = $from instanceof VertexInterface ? $from->getVertexIdentifier() : $from;
+        $toId = $to instanceof VertexInterface ? $to->getVertexIdentifier() : $to;
+        if (!isset($this->edges[$fromId][$toId])) {
+            throw new \InvalidArgumentException('No such vertex ' . $fromId . ' => ' . $toId, 231225123226);
+        }
+        $backup = $this->edges[$fromId][$toId];
+        unset($this->edges[$fromId][$toId]);
+        return $backup;
     }
 
     private function ensureVertex(VertexInterface $vertex, bool $addIfNonExisting, string $errorPrefix = 'Vertex'): string

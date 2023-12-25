@@ -121,4 +121,33 @@ class ArrayUtility
         $filter = $search instanceof \Closure ? $search : fn (mixed $v) => $v === $search;
         return array_keys(array_filter($array, $filter));
     }
+
+    /**
+     * @template TValue
+     * @param int $selectAmount
+     * @param TValue ...$values
+     * @return \Generator<TValue>
+     */
+    public static function getCombinations(int $selectAmount, mixed ...$values): \Generator
+    {
+        $values = array_values($values);
+        if ($selectAmount < 1) {
+            throw new \OutOfRangeException('Can\'t select < 1 options', 231225124106);
+        }
+        if ($selectAmount > count($values)) {
+            throw new \OutOfRangeException('Can\'t select more than amount of values', 231225124316);
+        }
+        if ($selectAmount === 1) {
+            foreach ($values as $value) {
+                yield [$value];
+            }
+            return;
+        }
+
+        for ($i = 0; $i < count($values) - $selectAmount + 1; $i++) {
+            foreach (static::getCombinations($selectAmount - 1, ...array_slice($values, $i + 1)) as $option) {
+                yield [$values[$i], ...$option];
+            }
+        }
+    }
 }

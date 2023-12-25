@@ -82,4 +82,37 @@ class ArrayUtilityTest extends TestCase
             [[1, 2, 3, 4], (2 + 3) / 2],
         ];
     }
+
+    /**
+     * @dataProvider dataProviderGetCombinations
+     */
+    public function testGetCombinations(int $selectAmount, array $values, array $expected): void
+    {
+        $this->assertSame(
+            $expected,
+            iterator_to_array(ArrayUtility::getCombinations($selectAmount, ...$values))
+        );
+    }
+
+    public function dataProviderGetCombinations(): array
+    {
+        return [
+            [
+                3,
+                ['a', 'b', 'c', 'd', 'e'],
+                [
+                    ['a', 'b', 'c'],
+                    ['a', 'b', 'd'],
+                    ['a', 'b', 'e'],
+                    ['a', 'c', 'd'],
+                    ['a', 'c', 'e'],
+                    ['a', 'd', 'e'],
+                    ['b', 'c', 'd'],
+                    ['b', 'c', 'e'],
+                    ['b', 'd', 'e'],
+                    ['c', 'd', 'e'],
+                ]
+            ]
+        ];
+    }
 }

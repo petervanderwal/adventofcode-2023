@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Algorithm;
 
+use App\Algorithm\ShortestPath\Graph;
 use App\Algorithm\ShortestPath\GraphInterface;
 use App\Algorithm\ShortestPath\VertexInterface;
 use App\Model\WeightedQueue;
@@ -44,6 +45,11 @@ class Dijkstra
         return (new static($graph, ...$sources))
             ->initiate()
             ->run();
+    }
+
+    public function getGraph(): Graph
+    {
+        return $this->graph;
     }
 
     public function getAllDistances(): array
